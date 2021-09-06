@@ -1,0 +1,7 @@
+name = "ProBeTune"
+uuid = "a45f557c-d53d-4332-b333-3da8e5e856d9"
+authors = ["hellmann <hellmann@pik-potsdam.de>"]
+version = "0.1.0"
+
+[deps]
+DiffEqFlux = "aae7a2af-3d4f-5e19-a356-7da93b79d9d0"
