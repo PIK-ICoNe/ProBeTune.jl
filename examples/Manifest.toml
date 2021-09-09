@@ -756,7 +756,7 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[ProBeTune]]
-deps = ["DiffEqFlux", "OrdinaryDiffEq", "Statistics"]
+deps = ["DiffEqFlux", "LightGraphs", "OrdinaryDiffEq", "Statistics"]
 path = ".."
 uuid = "a45f557c-d53d-4332-b333-3da8e5e856d9"
 version = "0.1.0"

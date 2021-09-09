@@ -3,16 +3,6 @@ This submodule contains useful implementations of the various parts of a probabi
 """
 module PBTLibrary
 
-"""
-Random fourier modes sampler
-"""
-function random_fourier_modes_sampler(t_span, n; N_frequencies = 10, periods = 2)
-    a = randn(N_frequencies)
-    theta = 2*pi*rand(N_frequencies)
-    ω = periods * 2π/(t_span[2] - t_span[1])
-    return t -> sum([a[n]*cos(n*t+theta[n]) for n in 1:N_frequencies])
-end
-
 
 """
 Quick callback function to be used in the sciml_train optimization process. Displays current loss.
