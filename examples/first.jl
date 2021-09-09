@@ -9,4 +9,7 @@ using ProBeTune
 
 ##
 
-ProBeTune.blerg()
+i = PBTLibrary.random_fourier_modes_sampler((0., 2.), 4)
+
+
+##

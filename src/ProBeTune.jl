@@ -4,6 +4,7 @@ import Base.@kwdef
 
 using OrdinaryDiffEq
 using DiffEqFlux
+using Statistics
 
 export PBTProblem
 """
@@ -71,13 +72,13 @@ function solve_sys_spec(pbt::PBTProblem, i, p_sys, p_spec; solver_options...)
     sol_sys, sol_spec
 end
 
-export solve_pbt_n
+export solve_sys_spec_n
 """
-Solve PBC problem for the nth input sample given a stacked parameter array p.
+Solve system and spec for the nth input sample given a stacked parameter array p.
 Parameters:
-- pbt: existing PBTProblem instance
-- n: number of input in the array
-- p: combined array of sys and spec parameters
+- `pbt`: existing PBTProblem instance
+- `n`: number of input in the array
+- `p`: combined array of sys and spec parameters
 """
 function solve_sys_spec_n(pbt::PBTProblem, n::Int, p; solver_options...)
     p_sys = view(p,1:pbt.size_p_sys)
@@ -144,30 +145,28 @@ function behavioural_distance(pbt::PBTProblem, p; verbose=true, optimizer=DiffEq
       p_specs = [p_tuned[pbt.size_p_sys + 1 + (n - 1) * pbt.size_p_spec:pbt.size_p_sys + n * pbt.size_p_spec] for n in 1:pbt.N_samples]
   end
 
-  verbose && print("0 out of $N_samples samples tuned")
+  verbose && print("0 out of $(pbt.N_samples) samples tuned")
 
-  distance = 0.
+  distances = zeros(pbt.N_samples)
 
   for n in 1:pbt.N_samples
     res = DiffEqFlux.sciml_train(
-        x -> pbt_individual_loss(pbt::PBTProblem, n, p_sys, x; solver_options...)
+        x -> pbt_individual_loss(pbt, n, p_sys, x; solver_options...),
         Array(p_specs[n]),
         optimizer;
         optimizer_options...
         )
-    verbose && print("\r$n out of $N_samples samples tuned")
+    verbose && print("\r$n out of $(pbt.N_samples) samples tuned")
     p_specs[n] .= res.minimizer
-    distance += res.minimum
+    distances[n] = res.minimum
   end
-  # println(p_sys)
-  # println(p_specs)
-  distance / N_samples, p_tuned
+
+  mean(distances), p_tuned, distances
 end
 
 
 ###################
-# Behavioural Distance
-# For a fixed system we can provide a given p_sys.
+# Tuning the system
 ###################
 
 export pbt_tuning
@@ -184,7 +183,7 @@ Tune the system to the specification.
 """
 function pbt_tuning(pbt::PBTProblem, p; optimizer=DiffEqFlux.ADAM(0.01), optimizer_options=(:maxiters => 100,), solver_options...)
   DiffEqFlux.sciml_train(
-    x -> pbt_loss(pbt::PBTProblem, p; solver_options...)
+    x -> pbt_loss(pbt, p; solver_options...),
     p,
     optimizer;
     optimizer_options...
