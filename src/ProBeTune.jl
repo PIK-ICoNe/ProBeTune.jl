@@ -160,7 +160,7 @@ function behavioural_distance(pbt::PBTProblem, p; verbose=true, optimizer=DiffEq
     p_specs[n] .= res.minimizer
     distances[n] = res.minimum
   end
-
+  print("\n")
   mean(distances), p_tuned, distances
 end
 
@@ -183,7 +183,7 @@ Tune the system to the specification.
 """
 function pbt_tuning(pbt::PBTProblem, p; optimizer=DiffEqFlux.ADAM(0.01), optimizer_options=(:maxiters => 100,), solver_options...)
   DiffEqFlux.sciml_train(
-    x -> pbt_loss(pbt, p; solver_options...),
+    x -> pbt_loss(pbt, x; solver_options...),
     p,
     optimizer;
     optimizer_options...
