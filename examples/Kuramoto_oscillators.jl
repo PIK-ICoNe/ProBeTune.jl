@@ -56,7 +56,7 @@ res = pbt_tuning(kur, p_dist_2; abstol=1e-4, reltol=1e-4,
                 optimizer=DiffEqFlux.BFGS(),
                 optimizer_options=(
                     :maxiters => 5, 
-                    :cb => PBTLibrary.basic_bac_callback))
+                    :cb => PBTLibrary.basic_pbt_callback))
                 
 
 p_t2 = res.minimizer
@@ -72,7 +72,7 @@ d4, p_dist_4, = behavioural_distance(kur, p_dist_3; abstol=1e-4, reltol=1e-4,
                 optimizer = DiffEqFlux.BFGS(),
                 optimizer_options=(
                     :maxiters => 20, 
-                    :cb => PBTLibrary.basic_bac_callback))
+                    :cb => PBTLibrary.basic_pbt_callback))
 
 d4, p_dist_4, = behavioural_distance(kur, p_dist_4; abstol=1e-4, reltol=1e-4,
                 optimizer = DiffEqFlux.AMSGrad(0.01),
