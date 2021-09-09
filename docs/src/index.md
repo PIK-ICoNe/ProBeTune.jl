@@ -1,4 +1,4 @@
-# Probabilistic behavioural control
+# Probabilistic Behaviour Tuning
 
 ## Introduction
 A central problem of control theory is to make a system with a complex interior present a unified, aggregate behaviour towards the outside world. Further, the aggregate behaviour should be close to some specification.

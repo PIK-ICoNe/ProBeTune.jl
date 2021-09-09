@@ -19,5 +19,6 @@ docs/site/
 
 # Ignore the manifests of the package, but not of the examples, docs, test folder.
 # This way we can have reproducable examples, docs, tests...
-!/**/Manifest.toml
 /Manifest.toml
+
+.vscode
