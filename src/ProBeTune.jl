@@ -131,7 +131,7 @@ Tune the specification parameters only to calculate the behvaioural distance of 
 to the specification.
 
 # Arguments:
-- `pbt`: BAC problem
+- `pbt`: PBT problem
 - `p`: stacked array of system parameters and initial parameters for the specifications
 - `optimizer`: choose optimization algorithm (default `DiffEqFlux.ADAM(0.01)`)
 """
@@ -175,7 +175,7 @@ export pbt_tuning
 Tune the system to the specification.
 
 # Arguments:
-- `pbt`: BAC problem
+- `pbt`: PBT problem
 - `p`: stacked array of initial system and specification parameters
 - `optimizer`: choose optimization algorithm (default `DiffEqFlux.ADAM(0.01)`)
 - `optimizer_options`: choose optimization options (default `(:maxiters => 100,)`)

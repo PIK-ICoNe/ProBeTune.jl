@@ -17,7 +17,7 @@ end
 """
 Quick callback function to be used in the sciml_train optimization process. Displays current loss.
 """
-function basic_bac_callback(p, loss)
+function basic_pbt_callback(p, loss)
     display(loss)
     return false
 end
