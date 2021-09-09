@@ -199,4 +199,7 @@ end
 export PBTLibrary
 include("PBTLibrary.jl")
 
+export PBTExample
+include("PBTExample.jl")
+
 end
