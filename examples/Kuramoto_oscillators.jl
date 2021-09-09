@@ -37,7 +37,10 @@ kur = PBTExample.create_kuramoto_example(omega, N_osc, size_p_spec, K_av, t_step
 
 ##
 
-d, p_dist, = behavioural_distance(kur, p_initial; abstol=1e-4, reltol=1e-4)
+d, p_dist, = behavioural_distance(kur, p_initial; abstol=1e-4, reltol=1e-4,optimizer=DiffEqFlux.BFGS(),
+                                    optimizer_options=(
+                                        :maxiters => 20, 
+                                        :cb => PBTLibrary.basic_pbt_callback))
 println("Initial distance to specified behaviour is lower than $d")
 
 ##
