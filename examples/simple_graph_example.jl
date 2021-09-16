@@ -91,6 +91,9 @@ resample!(graph_example)
 d_rs, p3 = behavioural_distance(graph_example, p_tuned)
 
 println(d_rs/d)
+
+##
+plot_callback(graph_example, p3, d_rs, scenario_nums = scenarios)
 #=
 The median individual loss has gone up by a factor of 4. 
 This means that the system is somewhat overfit to the initial sample.
@@ -116,20 +119,20 @@ plot_callback(graph_example, p_100_initial, d100, scenario_nums = scenarios)
 
 #= Now we can train the full system:
 =#
-res_100 = pbt_tuning(graph_example, p_100_initial; abstol=1e-6, reltol=1e-6,
-                    optimizer = BFGS,
+res_100 = pbt_tuning(graph_example, p_100_initial; abstol=1e-4, reltol=1e-4,
+                    optimizer = BFGS(),
                     optimizer_options = (
                         :maxiters => 10,
                         :cb => PBTLibrary.basic_pbt_callback))
 
 p_tuned = res_100.minimizer
 
-
+plot_callback(graph_example, p_tuned, res_100.minimum, scenario_nums = scenarios)
 #= Continue improving it for 150 Steps with some plotting in between:=#
 for i in 1:30
     global res_100
     res_100 = pbt_tuning(graph_example, p_100_initial; abstol=1e-6, reltol=1e-6,
-                        optimizer = BFGS,
+                        optimizer = BFGS(),
                         optimizer_options = (
                             :maxiters => 10,
                             :cb => PBTLibrary.basic_pbt_callback))
