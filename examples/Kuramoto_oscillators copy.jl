@@ -31,29 +31,23 @@ p_spec_init = rand(size_p_spec) .+ 1.
 p_initial = vcat(p_sys_init, repeat(p_spec_init, N_samples))
 
 K_av = 1.
-omega_spreads = [1., 5., 12., 15.]
-N_omega = length(omega_spreads)
+##
+
 omega = randn(N_osc)
-omega .-= mean(omega)
+omega[1] = 0.
+omega .-= mean(omega[1:end])
 
 ##
 
-kur1 = PBTExample.create_kuramoto_example(omega, N_osc, size_p_spec, K_av, t_steps, N_samples)
-kur2 = PBTExample.create_kuramoto_example(omega.*2., N_osc, size_p_spec, K_av, t_steps, N_samples)
-kur5 = PBTExample.create_kuramoto_example(omega.*5., N_osc, size_p_spec, K_av, t_steps, N_samples)
-kur10 = PBTExample.create_kuramoto_example(omega.*10., N_osc, size_p_spec, K_av, t_steps, N_samples)
+function tune_run(omega, scale; N_osc = 10, size_p_spec = 2, K_av = 1., t_steps = 0.:0.1:10., N_samples = 10, save_plots = false)
+    kur = PBTExample.create_kuramoto_example(omega*scale, N_osc, size_p_spec, K_av, t_steps, N_samples)
 
-kur_exs = [kur1,kur2,kur5,kur10]
-d_final = ones(length(kur_exs))
-i = 1
-##
-for kur in kur_exs
-        
     d, p_dist, = behavioural_distance(kur, p_initial; abstol=1e-4, reltol=1e-4,
                                         optimizer=DiffEqFlux.BFGS(),
                                         optimizer_options=(
-                                            :maxiters => 20, 
+                                            :maxiters => 5, 
                                             :cb => PBTLibrary.basic_pbt_callback))
+    d_initial = d
     println("Initial distance to specified behaviour is lower than $d")
 
     ##
@@ -64,6 +58,9 @@ for kur in kur_exs
     scen = 1:5
     ##
     plot_callback(kur, p_tuned, res.minimum, scenario_nums = scen)
+    if save_plots
+        savefig("../plots/res_"*string(round(scale, digits = 4))*"_initial_d$d.png")
+    end
     ##
     d2, p_dist_2, = behavioural_distance(kur, p_tuned; abstol=1e-4, reltol=1e-4)
 
@@ -85,21 +82,45 @@ for kur in kur_exs
 
     println("After a second tuning using BFGS the distance to specified behaviour is lower than $d3")
     ##
-
     resample!(kur)
     d4, p_dist_4, = behavioural_distance(kur, p_dist_3; abstol=1e-4, reltol=1e-4,
                     optimizer = DiffEqFlux.BFGS(),
                     optimizer_options=(
-                        :maxiters => 20, 
+                        :maxiters => 10, 
                         :cb => PBTLibrary.basic_pbt_callback))
 
-    d4, p_dist_4, = behavioural_distance(kur, p_dist_4; abstol=1e-4, reltol=1e-4,
+    d5, p_dist_5, = behavioural_distance(kur, p_dist_4; abstol=1e-4, reltol=1e-4,
                     optimizer = DiffEqFlux.AMSGrad(0.01),
                     optimizer_options=(
                         :maxiters => 2000,))
         
-
+    plot_callback(kur, p_dist_5, d5, scenario_nums = scen)
+    if save_plots
+        savefig("../plots/res_"*string(round(scale, digits = 4))*"_final_d$d5.png")
+    end
     println("After resampling the distance to specified behaviour is lower than $d4")
-    d_final[i] = d4
-    i +=1
+    d_final = d5
+    d_initial, d_final
 end
+##
+#res = [tune_run(kur) for kur in kur_exs]
+scales = [1., 2., 3., 4., 5., 6.]
+@time res1 = tune_run(omega, 1., save_plots = true)
+
+
+res2 = tune_run(omega, 2.)
+res5 = tune_run(omega, 5.)
+res7 = tune_run(omega, 7.)
+@time res5 = tune_run(omega, 5.)
+@time res6 = tune_run(omega, 6.)
+
+##
+res = [res1, res2, res5]
+
+q = [r[1]/r[2] for r in res]
+d, p_dist, = behavioural_distance(kur7, p_initial; abstol=1e-4, reltol=1e-4,
+optimizer=DiffEqFlux.BFGS(),
+optimizer_options=(
+    :maxiters => 10, 
+    :cb => PBTLibrary.basic_pbt_callback))
+res0 = pbt_tuning(kur7, p_dist; abstol=1e-4, reltol=1e-4, optimizer_options = (:maxiters => 200))

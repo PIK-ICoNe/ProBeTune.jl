@@ -22,3 +22,6 @@ docs/site/
 /Manifest.toml
 
 .vscode
+
+# Ignore the folder for saving plots
+plots/
