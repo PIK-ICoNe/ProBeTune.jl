@@ -46,7 +46,7 @@ function tune_run(omega, scale; save_plots = false)
     ##
     scen = 1:3
 
-    plot_callback(kur, p_dist, d, scenario_nums = scen, offsest = 1, title = "Scenarios $scen, mean(ω) = $scale")
+    plot_callback(kur, p_dist, d, scenario_nums = scen, title = "Scenarios $scen, mean(ω) = $scale")
     if save_plots
         savefig("../plots/kur/res_"*string(round(scale, digits = 4))*"_initial_"*string(round(d, digits = 4))*".png")
     end
@@ -85,7 +85,7 @@ function tune_run(omega, scale; save_plots = false)
                     optimizer_options=(
                         :maxiters => 2000,))
     
-    plot_callback(kur, p_dist_5, d5, scenario_nums = scen, offset = 1, title = "Scenarios $scen, mean(ω) = $scale")
+    plot_callback(kur, p_dist_5, d5, scenario_nums = scen, title = "Scenarios $scen, mean(ω) = $scale")
     if save_plots
         savefig("../plots/kur/res_"*string(round(scale, digits = 4))*"_final_"*string(round(d5, digits = 4))*".png")
     end
