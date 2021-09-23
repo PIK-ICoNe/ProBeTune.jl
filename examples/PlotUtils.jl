@@ -14,7 +14,7 @@ Optional parameters:
 - offset: defines by how much each scenario is offset from the previous one for better plot readability. If set to -1, all samples are plotted on subplots instead of a single figure.
 - plot_options: various plot options
 """
-function plot_callback(pbt, p, loss; loss_array=nothing, scenario_nums=nothing, fig_name=nothing, offset=2, plot_options...)
+function plot_callback(pbt, p, loss; loss_array=nothing, scenario_nums=nothing, fig_name=nothing, offset=2, title = nothing, plot_options...)
     display(loss)
     plt = plot()
     isnothing(scenario_nums) ? scenario_nums = rand(1:pbt.N_samples) : nothing
@@ -54,7 +54,11 @@ function plot_callback(pbt, p, loss; loss_array=nothing, scenario_nums=nothing, 
                 scenarios_line *= "$s, "
             end
             scenarios_line *= "$(scenario_nums[end])"
-            title!("Scenarios " * scenarios_line)
+            if isnothing(title)
+                title!("Scenarios " * scenarios_line)
+            else 
+                title!(title)
+            end
             xlabel!("t")
             ylabel!("output")
             display(plt)
