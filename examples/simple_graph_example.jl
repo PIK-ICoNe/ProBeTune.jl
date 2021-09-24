@@ -17,7 +17,7 @@ Random.seed!(1)
 
 ##
 include("PlotUtils.jl")
-
+path = "../plots/simple_graph_example/"
 ##
 
 #=
@@ -41,13 +41,13 @@ d, p_tuned, dists = behavioural_distance(graph_example, p_initial; abstol=1e-2, 
 ##
 scenarios = 1:3 # we can choose what scnearios to use for plots everywhere
 plot_callback(graph_example, p_initial, d, scenario_nums=scenarios)
-savefig("../plots/graph_example10_initial_"*string(round(d, digits = 4))*".png")
+savefig(path*"graph_example10_initial_"*string(round(d, digits = 4))*".png")
 
 ##
 res_10 = pbt_tuning(graph_example, p_tuned; abstol=1e-4, reltol=1e-4,
                     optimizer = ADAM(0.5),
                     optimizer_options = (
-                        :maxiters => 25,
+                        :maxiters => 50,
                         :cb => PBTLibrary.basic_pbt_callback))
 
 p_tuned = res_10.minimizer
@@ -55,7 +55,7 @@ p_tuned = res_10.minimizer
 res_10 = pbt_tuning(graph_example, p_tuned; abstol=1e-6, reltol=1e-6,
                     optimizer = ADAM(0.1),
                     optimizer_options = (
-                        :maxiters => 50,
+                        :maxiters => 100,
                         :cb => PBTLibrary.basic_pbt_callback))
 
 p_tuned = res_10.minimizer
@@ -63,7 +63,7 @@ p_tuned = res_10.minimizer
 
 plot_callback(graph_example, p_tuned, res_10.minimum, scenario_nums = scenarios)
 
-savefig("../plots/graph_example10_final_"*string(round(res_10.minimum, digits = 4))*".png")
+savefig(path*"graph_example10_final_"*string(round(res_10.minimum, digits = 4))*".png")
 ##
 
 #=
@@ -76,6 +76,7 @@ print(relu.(p_tuned))
 We can check the quality of the resulting minimizer by optimizing the specs only (a much simpler repeated 2d optimization problem)
 =#
 d, p2 = behavioural_distance(graph_example, p_tuned)
+plot_callback(graph_example, p2, d, scenario_nums = scenarios)
 
 #=
 In order to understand how much we were overfitting with respect to the concrete sample, we resample.
@@ -89,7 +90,7 @@ println(d_rs/d)
 
 ##
 plot_callback(graph_example, p3, d_rs, scenario_nums = scenarios)
-savefig("../plots/graph_example10_resampled_"*string(round(d_rs, digits = 4))*".png")
+savefig(path*"graph_example10_resampled_"*string(round(d_rs, digits = 4))*".png")
 
 #=
 The median individual loss has gone up by a factor of 4. 
@@ -113,7 +114,7 @@ d100, p_100_initial = behavioural_distance(graph_example, p_100;
                     abstol = 1e-3, reltol=1e-3)
 
 plot_callback(graph_example, p_100_initial, d100, scenario_nums = scenarios)
-savefig("../plots/graph_example100_initial_"*string(round(d100, digits = 4))*".png")
+savefig(path*"graph_example100_initial_"*string(round(d100, digits = 4))*".png")
 
 #= Now we can train the full system:
 =#
@@ -135,15 +136,22 @@ for i in 1:10
                             :maxiters => 5,
                             :cb => PBTLibrary.basic_pbt_callback))
     p_tuned = res_100.minimizer
+    res_100 = pbt_tuning(graph_example, p_tuned; abstol=1e-6, reltol=1e-6,
+                        optimizer = ADAM(0.01),
+                        optimizer_options = (
+                            :maxiters => 100,
+                            :cb => PBTLibrary.basic_pbt_callback))
+    p_tuned = res_100.minimizer
     plot_callback(graph_example, res_100.minimizer, res_100.minimum, scenario_nums = scenarios)
 end
 
-plot_callback(graph_example, p_tuned, res_100.minimum; scenario_nums=scenarios)
-savefig("../plots/graph_example100_final_"*string(round(res_100.minimum, digits = 4))*".png")
 ##
-d, p, losses = behavioural_distance(graph_example, res_10.minimizer)
+d, p, losses = behavioural_distance(graph_example, res_100.minimizer)
 
-x= exp10.(range(log10(.05),stop=log10(0.4), length = 50))
+plot_callback(graph_example, p, d; scenario_nums=scenarios)
+savefig(path*"graph_example100_final_"*string(round(d, digits = 4))*".png")
+
+x= exp10.(range(log10(.1),stop=log10(1.5), length = 50))
 plot(x, (x)->1-PBTLibrary.confidence_interval(losses, x)[1],
     xlabel = "ε", ylabel=L"\hat d^{\rho,\varepsilon}",legend=:bottomright, label=false,c=:blue)
     #label="Fraction of scenarios within set distance from specification")
@@ -154,4 +162,5 @@ plot(x, (x)->1-PBTLibrary.confidence_interval(losses, x)[1],
         xlabel = "ε", ylabel=L"\hat d^{\rho,\varepsilon}",legend=:bottomright, label=false, linestyle=:dash, c=:blue)
         #label="Fraction of scenarios within set distance from specification")
 
+savefig(path*"graph_example_confidence_interval.png")
 plot(sort!(losses),[1:length(losses)]./length(losses), label = false)
