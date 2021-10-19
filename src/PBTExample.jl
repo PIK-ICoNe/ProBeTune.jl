@@ -56,7 +56,7 @@ function (som::NoTransientOutputMetric)(sol_sys, sol_spec)
     end
 end
 
-function create_graph_example(dim_sys, av_deg, tsteps, N_samples)
+function create_diffusive_nl_example(dim_sys, av_deg, tsteps, N_samples)
     g_spec = SimpleGraph([Edge(1 => 2)])
     g_sys = barabasi_albert(dim_sys, av_deg)
 
