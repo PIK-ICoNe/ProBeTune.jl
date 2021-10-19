@@ -17,6 +17,8 @@ Random.seed!(1)
 ##
 include("PlotUtils.jl")
 ##
+path = "../plots/kuramoto/new/"
+##
 global t_steps = 0.:0.1:10.
 global tspan = (0., 10.)
 global N_osc = 10
@@ -39,40 +41,49 @@ function tune_run(omega, scale; save_plots = false)
     d, p_dist, = behavioural_distance(kur, p_initial; abstol=1e-4, reltol=1e-4,
                                         optimizer=DiffEqFlux.BFGS(),
                                         optimizer_options=(
-                                            :maxiters => 5, 
+                                            :maxiters => 10, 
                                             :cb => PBTLibrary.basic_pbt_callback))
     d_initial = d
     println("Initial distance to specified behaviour is lower than $d\n")
     ##
     scen = 1:3
-
-    plot_callback(kur, p_dist, d, scenario_nums = scen, title = "Scenarios $scen, mean(ω) = $scale")
+    ##
+    plot_callback(kur, p_dist, d, scenario_nums = scen, title = "Scenarios $scen, s = $scale", xlims = (kur.t_span[2]/2, kur.t_span[2]))
     if save_plots
-        savefig("../plots/kur/res_"*string(round(scale, digits = 4))*"_initial_"*string(round(d, digits = 4))*".png")
+        savefig(path*string(round(scale, digits = 4))*"_initial_"*string(round(d, digits = 4))*".png")
     end
     ##
     res = pbt_tuning(kur, p_dist; abstol=1e-4, reltol=1e-4)
     p_tuned = res.minimizer
     ##
-    #d2, p_dist_2, = behavioural_distance(kur, p_tuned; abstol=1e-4, reltol=1e-4)
+    d2, p_dist_2, = behavioural_distance(kur, p_tuned; abstol=1e-4, reltol=1e-4)
 
-    #println("After a first tuning using ADAM(0.01) the distance to specified behaviour is lower than $d2\n")
+    println("After a first tuning using ADAM(0.01) the distance to specified behaviour is lower than $d2\n")
 
     ##
 
-    res = pbt_tuning(kur, p_tuned; abstol=1e-4, reltol=1e-4,
+    res = pbt_tuning(kur, p_dist_2; abstol=1e-4, reltol=1e-4,
                     optimizer=DiffEqFlux.BFGS(),
                     optimizer_options=(
                         :maxiters => 5, 
                         :cb => PBTLibrary.basic_pbt_callback))
     
     p_t2 = res.minimizer
+    ##
+    plot_callback(kur, p_t2, res.minimum, scenario_nums = scen, title = "Scenarios $scen, s = $scale", xlims = (kur.t_span[2]/2, kur.t_span[2]))
 
+    if save_plots
+        savefig(path*string(round(scale, digits = 4))*"_tuned_"*string(round(res.minimum, digits = 4))*".png")
+    end
     ##
     d3, p_dist_3, = behavioural_distance(kur, p_t2; abstol=1e-4, reltol=1e-4, optimizer_options=(:maxiters => 1000,))
 
     println("After a second tuning using BFGS the distance to specified behaviour is lower than $d3\n")
     ##
+    plot_callback(kur, p_dist_3, d3, scenario_nums = scen, title = "Scenarios $scen, s = $scale", xlims = (kur.t_span[2]/2, kur.t_span[2]))
+    if save_plots
+        savefig(path*string(round(scale, digits = 4))*"_tuned2_"*string(round(d3, digits = 4))*".png")
+    end
     resample!(kur)
     d4, p_dist_4, = behavioural_distance(kur, p_dist_3; abstol=1e-4, reltol=1e-4,
                     optimizer = DiffEqFlux.BFGS(),
@@ -83,15 +94,16 @@ function tune_run(omega, scale; save_plots = false)
     d5, p_dist_5, = behavioural_distance(kur, p_dist_4; abstol=1e-4, reltol=1e-4,
                     optimizer = DiffEqFlux.AMSGrad(0.01),
                     optimizer_options=(
-                        :maxiters => 2000,))
+                        :maxiters => 1000,))
     
-    plot_callback(kur, p_dist_5, d5, scenario_nums = scen, title = "Scenarios $scen, mean(ω) = $scale")
+    plot_callback(kur, p_dist_5, d5, scenario_nums = scen, title = "Scenarios $scen, s = $scale", xlims = (kur.t_span[2]/2, kur.t_span[2]))
     if save_plots
-        savefig("../plots/kur/res_"*string(round(scale, digits = 4))*"_final_"*string(round(d5, digits = 4))*".png")
+        savefig(path*string(round(scale, digits = 4))*"_final_rs_"*string(round(d5, digits = 4))*".png")
     end
     println("After resampling the distance to specified behaviour is lower than $d4\n")
     d_final = d5
-    d_initial, d_final
+    p_final = p_dist_5
+    d_initial, d_final, p_final
 end
 ##
 
@@ -105,4 +117,9 @@ res = [tune_run(omega, s, save_plots = true) for s in scales]
 q = [r[1]/r[2] for r in res]
 
 plot(scales, q)
-savefig("../plots/kur/improvement(omega).png")
+savefig("../plots/kur/improvement(scale).png")
+scales2 = 6.:19.
+res2 = [tune_run(omega, s, save_plots = true) for s in scales2]
+
+plot(scales, [r[2] for r in res], xlabel = "s", ylabel = "d", label = "Final distance to specification")
+savefig("../plots/kur/final_d(omega).png")
