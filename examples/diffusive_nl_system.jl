@@ -17,7 +17,7 @@ Random.seed!(1)
 
 ##
 include("PlotUtils.jl")
-path = "../plots/diffusive_nl_system/new/"
+path = "../plots/diffusive_nl_system/" # for saving plots
 ##
 
 #=
