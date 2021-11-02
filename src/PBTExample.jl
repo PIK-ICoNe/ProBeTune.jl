@@ -11,9 +11,9 @@ relu(x) = max.(0., x)
 """
 Random fourier modes sampler
 """
-function random_fourier_modes_sampler(t_span, n; N_frequencies = 10, periods = 2)
-    a = randn(N_frequencies)
-    theta = 2*pi*rand(N_frequencies)
+function random_fourier_modes_sampler(rng, t_span, n; N_frequencies = 10, periods = 2)
+    a = randn(rng, N_frequencies)
+    theta = 2*pi*rand(rng, N_frequencies)
     ω = periods * 2π/(t_span[2] - t_span[1])
     return t -> sum([a[n]*cos(n*t+theta[n]) for n in 1:N_frequencies])
 end
@@ -63,10 +63,11 @@ function create_diffusive_nl_example(dim_sys, av_deg, tsteps, N_samples)
     f_spec = nl_diff_dyn(laplacian_matrix(g_spec))
     f_sys = nl_diff_dyn(laplacian_matrix(g_sys))
 
+    t_span = (tsteps[1], tsteps[end])
     PBTProblem(
         f_spec = f_spec,
         f_sys = f_sys,
-        input_distribution_sampler = random_fourier_modes_sampler,
+        input_sampler = ContinousInputSampler(random_fourier_modes_sampler, t_span),
         output_metric = StandardOutputMetric(1, 1),
         N_samples = N_samples,
         size_p_spec = 2,
@@ -74,7 +75,7 @@ function create_diffusive_nl_example(dim_sys, av_deg, tsteps, N_samples)
         y0_spec = zeros(2),
         y0_sys = zeros(dim_sys),
         tsteps = tsteps,
-        t_span = (tsteps[1], tsteps[end])
+        t_span = t_span
     )
 end
 
@@ -128,10 +129,11 @@ end
 
 function create_kuramoto_example(w, N_osc, dim_p_spec, K,  tsteps, N_samples)
     f_sys = kuramoto_osc(w[1:N_osc], N_osc, K)
+    t_span = (tsteps[1], tsteps[end])
     PBTProblem(
         f_spec = kuramoto_spec,
         f_sys = f_sys,
-        input_distribution_sampler = random_fourier_modes_sampler, # input function i(t) 
+        input_sampler = ContinousInputSampler(random_fourier_modes_sampler, t_span),
         output_metric = kuramoto_out_metric, # phase at interface node
         N_samples = N_samples,
         size_p_spec = dim_p_spec, # Parameters in the spec
@@ -139,8 +141,7 @@ function create_kuramoto_example(w, N_osc, dim_p_spec, K,  tsteps, N_samples)
         y0_spec = zeros(2), # Initial state conditions for spec ...
         y0_sys = zeros(2 * N_osc), # ... and sys
         tsteps = tsteps,
-        t_span = (tsteps[1], tsteps[end])
-    )
+        t_span = t_span)
 end
 
 
