@@ -207,7 +207,7 @@ function behavioural_distance(pbt::AbstractPBTProblem, p; verbose=true, optimize
       p_specs = [p_tuned[pbt.p.size_p_sys + 1 + (n - 1) * pbt.p.size_p_spec:pbt.p.size_p_sys + n * pbt.p.size_p_spec] for n in 1:pbt.p.N_samples]
   end
 
-  verbose && print("0 out of $(pbt.N_samples) samples evaluated")
+  verbose && print("0 out of $(pbt.p.N_samples) samples evaluated")
 
   distances = zeros(pbt.p.N_samples)
 
@@ -218,7 +218,7 @@ function behavioural_distance(pbt::AbstractPBTProblem, p; verbose=true, optimize
         optimizer;
         optimizer_options...
         )
-    verbose && print("\r$n out of $(pbt.N_samples) samples evaluated")
+    verbose && print("\r$n out of $(pbt.p.N_samples) samples evaluated")
     p_specs[n] .= res.minimizer
     distances[n] = res.minimum
   end
