@@ -21,6 +21,10 @@ docs/site/
 # This way we can have reproducable examples, docs, tests...
 /Manifest.toml
 
+# CI tests don't play well with checked in test/manifest
+# https://github.com/JuliaLang/Pkg.jl/issues/1585
+test/Manifest.toml
+
 .vscode
 
 # Ignore the folder for saving plots
