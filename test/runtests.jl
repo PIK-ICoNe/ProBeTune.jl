@@ -1,8 +1,3 @@
-cd(@__DIR__)
-using Pkg
-Pkg.activate(".")
-
-##
 using Test
 using ProBeTune
 using Statistics
