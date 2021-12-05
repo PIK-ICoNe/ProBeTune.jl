@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/403623669.svg)](https://zenodo.org/badge/latestdoi/403623669)
+
 # ProBeTune.jl
 Probabilistic Behaviour Tuning for controlled systems and networks
 
