@@ -12,12 +12,10 @@ using LaTeXStrings
 
 ##
 
-using Random
-Random.seed!(1)
-
 ##
 include("PlotUtils.jl")
 path = "../plots/diffusive_nl_system/" # for saving plots
+mkpath(path)
 ##
 
 #=
@@ -140,6 +138,7 @@ plot_callback(diffusive_nl_example, p_tuned, res_100.minimum, scenario_nums = sc
 #= Continue improving it for 150 Steps with some plotting in between:=#
 for i in 1:10
     global res_100
+    global p_tuned
 
     res_100 = pbt_tuning(diffusive_nl_example, p_tuned; abstol=1e-6, reltol=1e-6,
                         optimizer = ADAM(0.01),

@@ -11,14 +11,10 @@ using DiffEqFlux
 using LaTeXStrings
 
 ##
-
-using Random
-Random.seed!(1)
-
-##
 include("PlotUtils.jl")
 path = "../plots/kuramoto/" # for saving plots
-save_plots = false # set to true
+mkpath(path)
+save_plots = true # set to true
 ##
 #=
 Define global system parameters to use in the tune_run function
